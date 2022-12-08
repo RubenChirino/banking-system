@@ -98,7 +98,7 @@ public class ATM {
 			"********    Enter your Account PIN  ********" + "\n\n"
 			+ "Note: You can enter 0 if you want to exit"
 		);
-		if (!Objects.isNull(pin)) {
+		if (!Objects.isNull(pin)  && pin != "" && pin.length() > 0) {
 			if (pin.length() == 1 && Integer.parseInt(pin) == 0) {
 				JOptionPane.showMessageDialog(
 					null,
@@ -113,41 +113,55 @@ public class ATM {
 		return false;
 	}
 
-	public Transaction getTransaction(Account account) {
+	public Transaction getDoTransactionScreen(Account account) {
 		    
-		String type = JOptionPane.showInputDialog(
-			null,
-			"********    Select the transaction type  ********" + "\n\n"
-			+ "1- Deposit" + "\n\n"
-			+ "2- Withdrawal" + "\n\n"
-			+ "Your current balance: " + account.getFormattedMoney() + "\n\n"
-			+ "Note: You can enter 0 if you want to exit"
-		);
-		
+		String type;
 		Transaction transaction = null;
-		if (!Objects.isNull(type)) {
-			switch(Integer.parseInt(type)) {
-			  case 0:
-				  JOptionPane.showMessageDialog(
-						null,
-						"********    Thanks for use our system!   ********" + "\n\n"
-				  );
-				  System.exit(0);
-			    break;
-			  case 1:
-				  transaction = new Deposit(0);
-			    break;
-			  case 2:
-				  transaction = new Withdrawal(0);
-			    break;
-			  default:
-				  JOptionPane.showMessageDialog(
+		boolean TypeTransactionError;
+		
+		do {
+			TypeTransactionError = false;
+			
+			type = JOptionPane.showInputDialog(
+					null,
+					"********    Select the transaction type  ********" + "\n\n"
+					+ "1- Deposit" + "\n\n"
+					+ "2- Withdrawal" + "\n\n"
+					+ "Your current balance: " + account.getFormattedMoney() + "\n\n"
+					+ "Note: You can enter 0 if you want to exit"
+				);
+			
+			if (!Objects.isNull(type) && type.length() == 1) {
+				switch(Integer.parseInt(type)) {
+				  case 0:
+					  JOptionPane.showMessageDialog(
+							null,
+							"********    Thanks for use our system!   ********" + "\n\n"
+					  );
+					  System.exit(0);
+				    break;
+				  case 1:
+					  transaction = new Deposit(0);
+				    break;
+				  case 2:
+					  transaction = new Withdrawal(0);
+				    break;
+				  default:
+					  TypeTransactionError = true;
+					  JOptionPane.showMessageDialog(
+							null,
+							"********    Incorrect value, try it again   ********" + "\n\n"
+					  );
+				}
+			} else {
+				TypeTransactionError = true;
+				JOptionPane.showMessageDialog(
 						null,
 						"********    Incorrect value, try it again   ********" + "\n\n"
-				  );
-			}
-		}
-		
+				);
+			}	
+			
+		} while (TypeTransactionError);
 		
 		if (!Objects.isNull(transaction)) {
 			boolean error = false;
@@ -171,36 +185,40 @@ public class ATM {
 					 System.exit(0);
 				} else  {
 					
-					if (transaction instanceof Withdrawal) {
-						
-						if (Integer.parseInt(clientAmount) > account.getLimit()) {
-							JOptionPane.showMessageDialog(
-									null,
-									"********    The amount exceeds your withdrawal limit   ********" + "\n\n"
+					try {
+						if (transaction instanceof Withdrawal) {
+							if (Integer.parseInt(clientAmount) > account.getLimit()) {
+								JOptionPane.showMessageDialog(
+										null,
+										"********    The amount exceeds your withdrawal limit   ********" + "\n\n"
 								);
 								error = true;
-						} else if (Integer.parseInt(clientAmount) > getMoney()) {
-							JOptionPane.showMessageDialog(
-								null,
-								"********    Sorry, this ATM does not have the amount you want to withdraw   ********" + "\n\n"
-							);
-							error = true;
-						}
+							} else if (Integer.parseInt(clientAmount) > getMoney()) {
+								JOptionPane.showMessageDialog(
+									null,
+									"********    Sorry, this ATM does not have the amount you want to withdraw   ********" + "\n\n"
+								);
+								error = true;
+							}
+						} else if (transaction instanceof Deposit) {}
 						
-					} else if (transaction instanceof Deposit) {}
+						transaction.setAmount(Integer.parseInt(clientAmount));
+					} catch (Exception e) {
+						error = true;
+						JOptionPane.showMessageDialog(
+								null,
+								"********    An error has occurred, please enter correct values    ********" + "\n\n"
+							);
+					}
 					
 				}
 				
-				
-				
-				
-				
 			} while(error);
 			
-			transaction.setAmount(Integer.parseInt(clientAmount));
-			
-			boolean executeError = false;
+			boolean executeError;
 			do {
+				
+				executeError = false;
 				String execute = JOptionPane.showInputDialog(
 					null,
 					"********    Confirm the operation  ********" + "\n\n"
@@ -220,7 +238,16 @@ public class ATM {
 						  System.exit(0);
 					    break;
 					  case 1:
-						  transaction.execute(account);
+						  try {
+							  transaction.execute(account);
+							  JOptionPane.showMessageDialog(
+									null,
+									"********   The operation was successful   ********" + "\n\n"
+									+ "Your current balance: " + account.getFormattedMoney() + "\n\n"
+							  );
+						  } catch (Exception e) {
+							  return null;
+						  }
 					    break;
 					  case 2:
 						  JOptionPane.showMessageDialog(
@@ -243,5 +270,52 @@ public class ATM {
 		}
 		
 		return transaction;
+	}
+	
+	public boolean getDoYouWantToBeAnotherTransactionScreen() {
+		boolean anotherTransaction = false;
+		
+		boolean error;
+		do {
+			
+			error = false;
+			String repeatText = JOptionPane.showInputDialog(
+					null,
+					"********   Dou you want to be another operation?   ********" + "\n\n"
+					+ "1- Yes" + "\n\n"
+					+ "2- No" + "\n\n"
+				);
+					
+				if (!Objects.isNull(repeatText) && repeatText != "" && repeatText.length() == 1) {	
+					switch(Integer.parseInt(repeatText)) {
+						 case 1:
+							  anotherTransaction = true;
+						   break;
+
+						 case 2:
+							  JOptionPane.showMessageDialog(
+									null,
+									"********    Thanks for use our system!   ********" + "\n\n"
+							  );
+							  System.exit(0);
+						 break;
+						    
+						 default:
+							 error = true;
+							  JOptionPane.showMessageDialog(
+								null,
+								"********    Incorrect value, try it again   ********" + "\n\n"
+							  );
+					}	
+				} else {
+					JOptionPane.showMessageDialog(
+						null,
+						"********    Please enter a correct value    ********" + "\n\n"
+				    );
+					error = true;
+				}
+		} while (error);
+		
+		return anotherTransaction;
 	}
 }

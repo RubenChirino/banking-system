@@ -50,44 +50,46 @@ public class Main {
 			}
 		} while (Objects.isNull(ATMClient));
 		
-		// Get Bank Account
-		Account ATMAccount = null;
+		boolean repeat = false;
 		do {
-			ATMAccount = atm1.selectBankAccountScreen(ATMClient);
-			// Notification Message
-			if (Objects.isNull(ATMAccount)) {
-				JOptionPane.showMessageDialog(
-					null,
-					"********    You have entered an incorrect value, no account exists ********" + "\n\n"
-				);
-			}
-		} while (Objects.isNull(ATMAccount));
+			
+			// Get Bank Account
+			Account ATMAccount = null;
+			do {
+				ATMAccount = atm1.selectBankAccountScreen(ATMClient);
+				// Notification Message
+				if (Objects.isNull(ATMAccount)) {
+					JOptionPane.showMessageDialog(
+						null,
+						"********    You have entered an incorrect value, no account exists ********" + "\n\n"
+					);
+				}
+			} while (Objects.isNull(ATMAccount));
+			
+			// Authentication
+			boolean success = false;
+			do {
+				success = atm1.getAccountPINScreen(ATMAccount);
+				// Notification Message
+				if (!success) {
+					JOptionPane.showMessageDialog(
+						null,
+						"********    Incorrect PIN ********" + "\n\n"
+					);
+				}
+			} while (!success);
+			
+			// Operation
+			Transaction ATMTransaction;
+			do {
+				ATMTransaction = atm1.getDoTransactionScreen(ATMAccount);
+			} while (Objects.isNull(ATMTransaction));	
 		
-		// Authentication
-		boolean success = false;
-		do {
-			success = atm1.getAccountPINScreen(ATMAccount);
-			// Notification Message
-			if (!success) {
-				JOptionPane.showMessageDialog(
-					null,
-					"********    Incorrect PIN ********" + "\n\n"
-				);
-			}
-		} while (!success);
+			repeat = atm1.getDoYouWantToBeAnotherTransactionScreen();
+			
+		} while (repeat);
 		
-		// Operation
-		Transaction ATMTransaction;
-		do {
-			ATMTransaction = atm1.getTransaction(ATMAccount);
-		} while (Objects.isNull(ATMTransaction));
 		
-	
-		JOptionPane.showMessageDialog(
-			null,
-			"********    The operation was successful  ********" + "\n\n"
-			+ "Your current balance: " + ATMAccount.getFormattedMoney()
-		);
 		
 	}
 
