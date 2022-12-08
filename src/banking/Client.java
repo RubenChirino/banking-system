@@ -21,10 +21,6 @@ public class Client {
 	public ArrayList<Account> getAccounts() {
 		return accounts;
 	}
-
-	public void setAccounts(ArrayList<Account> accounts) {
-		this.accounts = accounts;
-	}
 	
 	public void addAccount(Account account) {
 		this.accounts.add(account);
